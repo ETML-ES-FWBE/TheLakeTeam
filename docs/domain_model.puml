@@ -2,19 +2,19 @@
 
 skinparam classAttributeIconSize 0
 
-class Employee {
-    - id : Long
-    - name : String
-    - email : String [Unique]
-    - department : Department
+class Voiture {
+    - plaqueImmatriculation : Int [Unique]
+    - marque : String
+    - couleur : String
 }
 
-class Department {
-    - id : Long [Unique]
-    - name : String
-    - employees : List<Employee>
+class Parking {
+    - id_parking : Int [Unique]
+    - ville : String
+    - place_parc : Int
+    - voiture : List<Voiture>
 }
 
-Employee "1" --> "1" Department : "belongs to"
-Department "1" --> "*" Employee : "has"
+Voiture "1" --> "1" Parking : "belongs to"
+Parking "1" --> "*" Voiture : "has"
 @enduml
