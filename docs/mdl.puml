@@ -1,15 +1,17 @@
 @startuml
-entity Employee {
-    + id : Long [PK]
-    + name : String
-    + email : String [Unique]
-    + department_id : Long [FK]
+
+entity "Voiture" {
+  * plaqueImmatriculation : Int <<PK>>
+  marque : String
+  couleur : String
+  parking_id : Int <<FK>>
 }
 
-entity Department {
-    + id : Long [PK, Unique]
-    + name : String
+entity "Parking" {
+  * id_parking : Int <<PK>>
+  ville : String
+  place_parc : Int
 }
 
-Employee }o--|| Department : "belongs to"
+Voiture }o--|| Parking : belongs to
 @enduml
