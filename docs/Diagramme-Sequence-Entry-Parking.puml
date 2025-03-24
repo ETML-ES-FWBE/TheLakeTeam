@@ -1,0 +1,44 @@
+@startuml
+actor API_CLIENT
+participant "ParkingController" as PC
+participant "ParkingService" as PS
+participant "ParkingRepository" as PR
+participant "VoitureRepository" as VR
+participant "ParkingEntity" as PE
+
+API_CLIENT -> PC: PUT /parking/{id_parking} {plaqueImmatriculation}
+PC -> PS: entryParking(int: id_parking, plaqueImmatriculation)
+
+alt Scénario nominal (Parking et Voiture trouvés)
+    PS -> PR: findById(int: id_parking): Parking
+    PR --> PS: Parking
+    PS -> VR: findById(int: plaqueImmatriculation): Voiture
+    VR --> PS: Voiture
+    PS -> PE: associerVoiture(Voiture)
+    PE --> PS: true  // Association réussie
+
+    PS --> PC: Succès: Voiture associée au parking
+    PC --> API_CLIENT: 200 OK
+
+else Parking non trouvé (Exception au niveau du service)
+    PS -> PR: findById(int: id_parking): Parking
+    PR --> PS: null
+    PS --> API_CLIENT: Throw ParkingNotFoundException
+
+else Voiture non trouvée (Exception au niveau du service)
+    PS -> PR: findById(int: id_parking): Parking
+    PR --> PS: Parking
+    PS -> VR: findById(int: plaqueImmatriculation): Voiture
+    VR --> PS: null
+    PS --> API_CLIENT: Throw VoitureNotFoundException
+
+else Erreur d'association (Exception au niveau de l'entité)
+    PS -> PR: findById(int: id_parking): Parking
+    PR --> PS: Parking
+    PS -> VR: findById(int: plaqueImmatriculation): Voiture
+    VR --> PS: Voiture
+    PS -> PE: associerVoiture(Voiture)
+    PE --> PS: Throw AssociationException  // Erreur dans l'entité
+    PS --> API_CLIENT: Throw AssociationException
+end
+@enduml
