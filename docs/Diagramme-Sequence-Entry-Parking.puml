@@ -12,25 +12,35 @@ PC -> PS: entryParking(int: id_parking, plaqueImmatriculation)
 alt Scénario nominal (Parking et Voiture trouvés)
     PS -> PR: findById(int: id_parking): Parking
     PR --> PS: Parking
-    PS -> VR: findById(int: plaqueImmatriculation): Voiture
-    VR --> PS: Voiture
-    PS -> PE: associerVoiture(Voiture)
-    PE --> PS: true  // Association réussie
+    PS -> PE: verifierDisponibilite()
+    alt Parking plein
+        PE --> PS: false
+        PS --> PC: Throw ParkingPleinException
+        PC --> API_CLIENT: 409 Conflict
+    else Places disponibles
+        PE --> PS: true
+        PS -> VR: findById(int: plaqueImmatriculation): Voiture
+        VR --> PS: Voiture
+        PS -> PE: associerVoiture(Voiture)
+        PE --> PS: true  // Association réussie
 
-    PS --> PC: Succès: Voiture associée au parking
-    PC --> API_CLIENT: 200 OK
+        PS --> PC: Succès: Voiture associée au parking
+        PC --> API_CLIENT: 200 OK
+    end
 
 else Parking non trouvé (Exception au niveau du service)
     PS -> PR: findById(int: id_parking): Parking
     PR --> PS: null
-    PS --> API_CLIENT: Throw ParkingNotFoundException
+    PS --> PC: Throw ParkingNotFoundException
+    PC --> API_CLIENT: 404 Not Found
 
 else Voiture non trouvée (Exception au niveau du service)
     PS -> PR: findById(int: id_parking): Parking
     PR --> PS: Parking
     PS -> VR: findById(int: plaqueImmatriculation): Voiture
     VR --> PS: null
-    PS --> API_CLIENT: Throw VoitureNotFoundException
+    PS --> PC: Throw VoitureNotFoundException
+    PC --> API_CLIENT: 404 Not Found
 
 else Erreur d'association (Exception au niveau de l'entité)
     PS -> PR: findById(int: id_parking): Parking
@@ -39,6 +49,7 @@ else Erreur d'association (Exception au niveau de l'entité)
     VR --> PS: Voiture
     PS -> PE: associerVoiture(Voiture)
     PE --> PS: Throw AssociationException  // Erreur dans l'entité
-    PS --> API_CLIENT: Throw AssociationException
+    PS --> PC: Throw AssociationException
+    PC --> API_CLIENT: 500 Internal Server Error
 end
 @enduml
